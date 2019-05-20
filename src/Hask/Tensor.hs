@@ -7,6 +7,8 @@ module Hask.Tensor
   , Semigroup(..), Monoid'(..), Monoid
   -- * Comonoids (Opmonoids)
   , Cosemigroup(..), Comonoid'(..), Comonoid
+  -- * (Lax) monoidal functors
+  , LaxMonoidal(..)
   ) where
 
 import Hask.Category
@@ -152,3 +154,23 @@ instance Cosemigroup Either Void  where
 
 instance Comonoid' Either Void where
   epsilon _ = id
+
+--------------------------------------------------------------------------------
+-- * (Lax) monoidal functors, AKA applicative functors
+--------------------------------------------------------------------------------
+
+class ( Tensor p
+      , Tensor q
+      , Dom p ~ Dom f
+      , Dom q ~ Cod f
+      , Functor f
+      ) => LaxMonoidal p q f where
+
+  -- | An arrow from the unit in the codomain to the image of the unit in the
+  --   domain
+  unit :: q (I q) (f (I p))
+
+  -- | An arrow in the codomain from the product of images to the image of a
+  --   product
+  prod :: forall x y. Cod f (q (f x) (f y)) (f (p x y))
+
